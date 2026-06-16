@@ -51,6 +51,7 @@ def main(pair, bmin, bmax, show):
 
     while is_next_job(db, jobtype='TOMO_FTAN') or pair:
         SACfilelist = []
+        savefiles=[]
         if not pair:
             jobs = get_next_job(db, jobtype='TOMO_FTAN')
 
@@ -65,10 +66,12 @@ def main(pair, bmin, bmax, show):
                     for comp in comps:
                         fn = os.path.join("TOMO_SAC", "%02i"%filter.ref, comp, "%s_%s_MEAN.sac"%(netsta1.replace('.','_'), netsta2.replace('.','_')))
                         print(fn)
-                        if os.path.isfile(fn):
-                            SACfilelist.append(fn)
-                        else:
-                            print("no file named", fn)
+                        if not os.path.exists(os.path.join("DISP CURVE PLOTS","%02i"%filter.ref, comp, "%s - %s.png"%(netsta1, netsta2))): #
+                            if os.path.isfile(fn):
+                                SACfilelist.append(fn)
+                                savefiles.append(os.path.join("DISP CURVE PLOTS","%02i"%filter.ref, comp))
+                            else:
+                                print("no file named", fn)
         else:
             for pi in pair:
                 netsta1, netsta2 = pi.split('_')
@@ -133,10 +136,13 @@ def main(pair, bmin, bmax, show):
             ymax = max(U)
 
             # filter only the picks that are within the y-limits
-            iu = np.where( (disper>=ymin) & (disper<=ymax) )
+            condition = (disper >= ymin) & (disper <= ymax)
+            iu = np.where(np.atleast_1d(condition))
             # print(iu[0])
             if len(iu[0]) != 0: # need to check if iu is empty.
+                per = np.atleast_1d(per)
                 per    = per[iu]
+                disper = np.atleast_1d(disper)
                 disper = disper[iu]  
                 
                 # Make sure you have the correct vectors; convert as needed
@@ -176,7 +182,7 @@ def main(pair, bmin, bmax, show):
             # maxp[i] = np.max(GVdisp[i]["PERIOD"])
 
             if PLOTDIAGR:
-                plot_FTAN_result(filename, basename, per, disper, diagramtype)
+                plot_FTAN_result(filename, basename, per, disper, diagramtype, savefiles[i])
 
 
         # Done with loop over the SAC files. Things below here
@@ -236,7 +242,7 @@ def write_tomo_disp_file(filename, basename, dcii, PER):
         os.makedirs(os.path.split(fn)[0])
     df.to_csv(fn, header=[basename,], float_format='%.4f')
 #==============================================================================
-def plot_FTAN_result(filename, basename, per, disper, diagramtype):
+def plot_FTAN_result(filename, basename, per, disper, diagramtype,save):
     # This function will plot the FTAN matrix and overlay the dispersion curve
 
     # get FTAN matrix
@@ -278,7 +284,12 @@ def plot_FTAN_result(filename, basename, per, disper, diagramtype):
 
     NET1, STA1, NET2, STA2, crap = os.path.split(filename)[1].split('_')
 
-    plt.title("FTAN\n%s.%s - %s.%s"%(NET1, STA1, NET2, STA2))
+    title="%s.%s - %s.%s"%(NET1, STA1, NET2, STA2)
+
+    plt.title("FTAN\n"+title)
+
+    os.makedirs(save, exist_ok=True) #
+    plt.savefig(os.path.join(save,f"{title}.png")) #
     plt.show()
 #==============================================================================
 def plot_raw_dispersion_curves(GVdisp):
@@ -327,7 +338,7 @@ def plot_interp_dispersion_curves(PER, Disp):
 def write_interp_disp_curve(PER, Disp, GVdisp):
     # Write a file for each period requrest by the user.
     # Each row in the file is a dispersion measurement between two stations
-    # PER = all of the periods requested by the user in tomoconfig
+    # PER = all the periods requested by the user in tomoconfig
     # Disp = [np,nd] group velocities at each period (np) for each station pair (nd)
 
     datapathout = "GROUPVEL_FILES/"
