@@ -196,6 +196,11 @@ def main():
         p.set_xlim(xmin, xmax)
         p.set_ylim(ymin, ymax)
         p.set_title("%s.%s - %s.%s (%.2f km)" % (NET1, STA1, NET2, STA2, dist))
+
+        title = "%s.%s - %s.%s" % (NET1, STA1, NET2, STA2)
+        os.makedirs("DISP CURVE PLOTS", exist_ok=True)
+        f.savefig(f"DISP CURVE PLOTS/{title}.png")
+        
         canvas.draw()
 
     def previous_file(e=None):
