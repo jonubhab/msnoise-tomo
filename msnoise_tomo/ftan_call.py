@@ -66,6 +66,7 @@ def pickgroupdispcurv(filename, fmin, fmax, vgmin, vgmax, bmin, bmax,
             print("Seed period: %f"%pinit)	
 
 
+
     # # Set the starting points depending on which plot type
     # if diagramtype == 'PV':
     #     finit = "%.5f"% (1./pinit)
@@ -104,7 +105,14 @@ def pickgroupdispcurv(filename, fmin, fmax, vgmin, vgmax, bmin, bmax,
     time.sleep(0.1)
     # TODO still need to figure out how to use the tginit input in the C++ code. vinit doesn't seem to have an impact!
 
-   	# Process the automatically picked dispersion curve from the C++ code.
+    '''
+    '''
+    from .idisp_pick import pick
+    pick(amp.T,P,V)
+    '''
+    '''
+
+   	# Process the automatically picked dispersion curve from jonubhab's code. Ha! Ha! Ha!
     D = np.loadtxt('write_disp.txt')
     if D.ndim == 2: # make sure that there is more than one pick
         isort  = np.argsort(D[:,0]) # sort based on the first column (period)
@@ -115,6 +123,9 @@ def pickgroupdispcurv(filename, fmin, fmax, vgmin, vgmax, bmin, bmax,
         print("Only one dispersion pick...check data!!!")
         per = D[0]
         disper = D[1]
+
+
+
 
     # print(per)
     # print(disper)
