@@ -48,7 +48,7 @@ def ftan_example():
     from .examplepickdispcurve import main
     main()
 
-@click.option('-p', '--pair', default=None,  help='FTAN a specific pair',
+@click.option('-p', '--pair', default=None,  help='FTAN a specific pair\tFormat: NET.STA1_NET.STA2',
               multiple=True)
 @click.option('-b', '--bmin', default=None,  help='force bmin',)
 @click.option('-B', '--bmax', default=None,  help='force bmax',)
@@ -57,6 +57,20 @@ def ftan_example():
 def ftan(pair, bmin, bmax, show):
     from .ftan import main
     main(pair, bmin, bmax, show)
+
+@click.option('-a','--all',is_flag=True, default=False,help='Reset the entire FTAN process and start from scratch.')
+@click.command(name="reset_ftan")
+def reset_ftan(all):
+    if all:
+        confirm_text = click.prompt(
+            "This will reset ALL FTAN jobs and progress. Type 'DELETE PROGRESS' to continue"
+        )
+        if confirm_text.strip() != "DELETE PROGRESS":
+            click.echo("Aborted.")
+            return
+    from .reset_ftan import main
+    main(all)
+
 
 @click.command()
 def iftan():
@@ -111,6 +125,7 @@ tomo.add_command(ftan_example)
 tomo.add_command(prepare_ccf)
 tomo.add_command(prepare_tomo)
 tomo.add_command(ftan)
+tomo.add_command(reset_ftan)
 tomo.add_command(iftan)
 tomo.add_command(install)
 tomo.add_command(answt)
