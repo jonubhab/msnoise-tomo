@@ -80,7 +80,13 @@ def main(pair, bmin, bmax, show):
                 # fn = os.path.join("TOMO_SAC", "%s_%s_REAL.SAC"%(netsta2.replace('.','_'), netsta1.replace('.','_')))
                 # SACfilelist.append(fn)
                 fn = os.path.join("TOMO_SAC", "%s_%s_MEAN.sac"%(netsta1.replace('.','_'), netsta2.replace('.','_')))
-                SACfilelist.append(fn)
+                if not os.path.exists(os.path.join("DISP CURVE PLOTS",
+                                                   "%s - %s.png" % (netsta1, netsta2))):  #
+                    if os.path.isfile(fn):
+                        SACfilelist.append(fn)
+                        savefiles.append("DISP CURVE PLOTS")
+                    else:
+                        print("no file named", fn)
                 break
             pair = None
         
