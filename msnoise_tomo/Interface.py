@@ -159,7 +159,7 @@ class ParameterPanel(ttk.Frame):
             ("Ytol", "Y Peak Isolation", saved.get("Ytol", 0.01), (0, None)),
             ("mtol", "Slope Tolerance", saved.get("mtol", 1),  (0, None)),
             ("AMPmin", "Minimum SNR", saved.get("AMPmin", 0.25), (0, 1)),
-            ("bias", "Positive Slope Bias", saved.get("Bias", 2),  (0, None)),
+            ("bias", "Positive Slope Bias", saved.get("bias", 2),  (0, None)),
         ]
 
         btn = [
