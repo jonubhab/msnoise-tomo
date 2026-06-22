@@ -20,6 +20,28 @@ If you've run the stock FTAN step on a real dataset, you've probably hit some co
 - A `reset_ftan` command that lets you safely resume an interrupted batch, or — if you really need to — wipe everything and start clean.
 - A "Reboot" shortcut for the specific failure mode where FTAN stops being able to render new plots after running for a while: it terminates, resets the affected job(s), and restarts `msnoise p tomo ftan` for you.
 The final curve, once you save it, is rendered to a `.png` for your records and `write_disp.txt` is overwritten with your picks — from there, the existing MSNoise code relocates it into `TOMO_DISP/` exactly as before.
+
+## Files changed and added
+
+### Modified
+
+| File | What changed |
+|---|---|
+| `plugin_definition.py` | Added the `reset_ftan` command to the `tomo` CLI group, including the `--all` flag and its `DELETE PROGRESS` confirmation gate. |
+| `ftan.py` | Before queuing a SAC file for processing, now checks whether its output plot already exists under `DISP CURVE PLOTS/`. If it does, that pair is skipped — this is what lets a resumed run skip pairs you've already picked instead of redoing the whole batch. |
+| `ftan_call.py` | After the FTAN binary's second (refined) pass, builds the picker's data object from its output and hands control to the picker window. If you used the picker, reloads `write_disp.txt` afterward so your edited picks — rather than the binary's raw output — are what get carried forward. |
+
+### Added
+
+| File | What it does |
+|---|---|
+| `Caller.py` | Launches the picker window, blocks until you close it, then pulls out whatever ridge you ended up with and writes it to `write_disp.txt`. |
+| `Interface.py` | The picker GUI itself — the plot panel, the parameter panel with the five tunable values, dark mode, and the Pick/Undo/Redo/Clean/Save/Reboot buttons. |
+| `Map.py` | The peak-detection scan — for each period/frequency column, finds local maxima in the SNR field using the `Xtol`/`Ytol`/`AMPmin` tolerances. |
+| `Point.py` | Represents each candidate peak (its position and selected/deselected state), the ridge-stitching logic (`mtol`/`bias`), and `Interact`, which owns the shared scatter plot and handles all the click/drag/alt/x mouse interactions. |
+| `cache.py` | The small history stack behind Undo, Redo, and Clean. |
+| `idisp_pick.py` | Bridges the raw FTAN output (amplitude matrix, axes, the binary's own picked curve) to the picker GUI — builds both the initial review plot and the interactive picking plot. |
+| `reset_ftan.py` | Implements both `reset_ftan` modes: the flag-only reset, and the destructive `--all` wipe that also deletes saved plots. |
  
 ## How the picking algorithm works
  
