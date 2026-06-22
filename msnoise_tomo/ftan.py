@@ -248,8 +248,10 @@ def write_tomo_disp_file(filename, basename, dcii, PER):
         os.makedirs(os.path.split(fn)[0])
     df.to_csv(fn, header=[basename,], float_format='%.4f')
 #==============================================================================
-def plot_FTAN_result(filename, basename, per, disper, diagramtype,save):
+def plot_FTAN_result(filename, basename, per, disper, diagramtype,save,show=True):
     # This function will plot the FTAN matrix and overlay the dispersion curve
+
+    print(filename,basename)
 
     # get FTAN matrix
     amp = np.loadtxt('%s_amp.txt'%basename).T
@@ -296,7 +298,7 @@ def plot_FTAN_result(filename, basename, per, disper, diagramtype,save):
 
     os.makedirs(save, exist_ok=True) #
     plt.savefig(os.path.join(save,f"{title}.png")) #
-    plt.show()
+    #plt.show()
 #==============================================================================
 def plot_raw_dispersion_curves(GVdisp):
     # This function will plot the raw dispersion curves that are come from write_disp.txt.

@@ -105,24 +105,54 @@ def pickgroupdispcurv(filename, fmin, fmax, vgmin, vgmax, bmin, bmax,
     time.sleep(0.1)
     # TODO still need to figure out how to use the tginit input in the C++ code. vinit doesn't seem to have an impact!
 
-    '''
-    '''
-    from .idisp_pick import pick
-    pick(amp.T,P,V)
-    '''
-    '''
-
-   	# Process the automatically picked dispersion curve from jonubhab's code. Ha! Ha! Ha!
+    # Process the automatically picked dispersion curve from C++ code.
     D = np.loadtxt('write_disp.txt')
-    if D.ndim == 2: # make sure that there is more than one pick
-        isort  = np.argsort(D[:,0]) # sort based on the first column (period)
-        D      = D[isort]
-        per    = D[:,0]
-        disper = D[:,1]
+    if D.ndim == 2:  # make sure that there is more than one pick
+        isort = np.argsort(D[:, 0])  # sort based on the first column (period)
+        D = D[isort]
+        per = D[:, 0]
+        disper = D[:, 1]
     else:
         print("Only one dispersion pick...check data!!!")
         per = D[0]
         disper = D[1]
+
+
+
+    '''
+    '''
+    per=np.atleast_1d(per)
+    disper=np.atleast_1d(disper)
+    comp=os.path.basename(os.path.dirname(filename))
+
+    from .Caller import main
+    from .idisp_pick import idisp
+    iwin=idisp(amp,P,V,per,disper)
+
+    data={"idisp":iwin,
+          "filename":filename,
+          "dist":dist,
+          "comp":comp}
+    main(data)
+
+    if iwin.picked:
+        # Process the automatically picked dispersion curve from jonubhab's code. Ha! Ha! Ha!
+        D = np.loadtxt('write_disp.txt')
+        if D.ndim == 2:  # make sure that there is more than one pick
+            isort = np.argsort(D[:, 0])  # sort based on the first column (period)
+            D = D[isort]
+            per = D[:, 0]
+            disper = D[:, 1]
+        else:
+            print("Only one dispersion pick...check data!!!")
+            per = D[0]
+            disper = D[1]
+
+
+    '''
+    '''
+
+
 
 
 
