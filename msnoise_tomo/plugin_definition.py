@@ -42,6 +42,15 @@ def prepare_ccf():
     from .export_single_sided import main
     main()
 
+@click.command(name="rotate_ref")
+def rotate_ref():
+    from .rotate_ref import main
+    main()
+
+@click.command(name="prepare_sw")
+def prepare_sw():
+    from .prepare_sw import main
+    main()
 
 @click.command(name="ftan_example")
 def ftan_example():
@@ -123,6 +132,8 @@ def plot3d():
 tomo.add_command(info)
 tomo.add_command(ftan_example)
 tomo.add_command(prepare_ccf)
+tomo.add_command(rotate_ref)
+tomo.add_command(prepare_sw)
 tomo.add_command(prepare_tomo)
 tomo.add_command(ftan)
 tomo.add_command(reset_ftan)
