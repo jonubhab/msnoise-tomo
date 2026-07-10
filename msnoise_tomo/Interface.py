@@ -20,7 +20,7 @@ from tkinter import ttk
 import pickle
 import matplotlib
 from matplotlib.backend_bases import key_press_handler, KeyEvent
-
+import sys
 matplotlib.use("TkAgg")
 from .cache import Cache
 import numpy as np
@@ -314,8 +314,18 @@ Click any empty region of the canvas to discard all selections.
         self.error_label.config(text="" if sucess else "Not in data picking mode. Click 'Pick' or press ENTER to pick dispersion curve.")
 
     def _handle_reboot(self,event=None):
+
         bash_path = shutil.which("bash") or "/bin/bash"
-        command_string = "msnoise p tomo reset_ftan && msnoise p tomo ftan"
+        '''
+        current_process = psutil.Process(os.getpid())
+        process = current_process.parent()
+        
+        while process and process.name() in ['bash', 'sh', 'zsh', 'python', 'python3']:
+            process = process.parent()
+            '''
+        parent_cmdline = sys.argv
+        print(parent_cmdline)
+        command_string = f'msnoise p tomo reset_ftan && {" ".join(parent_cmdline)}'
         exec_args = [bash_path, "-i", "-c", command_string]
         os.execv(bash_path, exec_args)
 
@@ -557,7 +567,7 @@ def build_interactive_plot(params, data=None):
     ax = fig.add_subplot(111)
     '''
 
-    fig,picker=data["idisp"].pick(params["Xtol"],params["Ytol"],params["mtol"],params["AMPmin"],params["bias"],data["idisp"].name,data["idisp"].per,data["idisp"].disper)
+    fig,picker=data["idisp"].pick(params["Xtol"],params["Ytol"],params["mtol"],params["AMPmin"],params["bias"],data["idisp"].name,data["idisp"].per,data["idisp"].dispers)
     data["idisp"].picked = True
 
     return fig, picker

@@ -2,7 +2,7 @@ import os
 import sys
 import traceback
 import zipfile
-
+import shutil
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -54,7 +54,7 @@ def loadG(nX, nY, file, gridfile,ANSWT_toolbox_path):
     from .lib.libmk_MatPaths import path
     path(file, gridfile)
     print('C code done')
-    DATA = np.fromfile('matG.bin', dtype=np.float)
+    DATA = np.fromfile('matG.bin', dtype=np.float64)
     G = DATA.reshape(-1,int(nX*nY))
     return G
 
@@ -102,7 +102,10 @@ def ANSWT(gridfile,stacoordfile,DCfile,paramfile,PERIOD, show, v_cmap, d_cmap):
     print(X)
     print("nX and Ny from gridfile & initModel", nX, nY)
 
-
+    ''''''
+    altsave=os.path.dirname(DCfile).replace("TOMO_FILES","ANSWT")
+    os.makedirs(altsave, exist_ok=True)
+    ''''''
     # Data loading
 
 
@@ -110,7 +113,10 @@ def ANSWT(gridfile,stacoordfile,DCfile,paramfile,PERIOD, show, v_cmap, d_cmap):
     STALOC = np.loadtxt(stacoordfile, dtype=str)
     print(STALOC)
     # STA1 STA2 PER VG eVG DIST
-    DC = np.loadtxt(DCfile, dtype=str)
+    DC = np.loadtxt(DCfile, dtype=str)  # DC = np.loadtxt(DCfile, dtype=str)
+    if DC.ndim == 1:
+        DC = np.atleast_2d(DC)
+    n_ray = len(DC)
     # Data formatting
 
     nbsta=STALOC.shape[0]
@@ -118,14 +124,16 @@ def ANSWT(gridfile,stacoordfile,DCfile,paramfile,PERIOD, show, v_cmap, d_cmap):
     Stations = np.zeros((nbCorr, 2), dtype=int)
 
     for nbc in range(nbCorr):
-        sta1 = DC[nbc][0]
-        sta2 = DC[nbc][1]
+        # Force convert the NumPy string elements to native Python strings
+        sta1 = str(DC[nbc][0])
+        sta2 = str(DC[nbc][1])
         for nbs in range(nbsta):
-            if sta1 == STALOC[nbs][0]:
-                Stations[nbc,0]=nbs
+            # Also convert the STALOC target to a native string for a flawless match
+            if sta1 == str(STALOC[nbs][0]):
+                Stations[nbc, 0] = nbs
 
-            if sta2 == STALOC[nbs][0]:
-                Stations[nbc,1]=nbs
+            if sta2 == str(STALOC[nbs][0]):
+                Stations[nbc, 1] = nbs
     Vg = np.array(DC[:,3], dtype=float)
     dist = np.array(DC[:,5], dtype=float)
 
@@ -447,9 +455,9 @@ def ANSWT(gridfile,stacoordfile,DCfile,paramfile,PERIOD, show, v_cmap, d_cmap):
         m = cm.ScalarMappable(norm=norm, cmap=v_cmap)
         colors = m.to_rgba(v)
         for (a,b,c,d,C) in zip(x11, x21, y11, y21, colors):
-            plt.plot([a,b],[c,d], color=C)
+            plt.plot([a,b],[c,d], color=C,lw=0.5)
         m._A = []
-        plt.colorbar(m)
+        plt.colorbar(m, ax=ax)
         plt.contour(X+dx/2, Y+dy/2, Dsity, [1,], colors='k')
         plt.xlim(lonlim[0], lonlim[1])
         plt.ylim(latlim[0], latlim[1])
@@ -530,6 +538,15 @@ def ANSWT(gridfile,stacoordfile,DCfile,paramfile,PERIOD, show, v_cmap, d_cmap):
         plt.contourf(X+dx/2, Y+dy/2, data2, 30, origin='lower',
                      cmap='jet_r')
         plt.show()
+
+    shutil.copy("result_density_%.4fs.png"%PERIOD,altsave)
+    shutil.copy("result_paths_%.4fs.png"%PERIOD,altsave)
+    shutil.copy("result_tomo_%.4fs.png" % PERIOD, altsave)
+    shutil.copy("test.png", altsave)
+    shutil.copy("tomo_%.4fs.txt" % PERIOD, altsave)
+    shutil.copy("tomo-result_%.4fs.kmz" % PERIOD, altsave)
+
+
 
 
 def main(per, a1, b1, l1, s1, a2, b2, l2, s2, filterid, comp, show):

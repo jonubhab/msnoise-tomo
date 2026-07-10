@@ -41,6 +41,19 @@ class Point:
     def y(self):
         return self.__y
 
+    def __add__(self, P):
+        return Point(self.x + P.x, self.y + P.y)
+
+    def __sub__(self, P):
+        return Point(self.x - P.x, self.y - P.y)
+
+    def dot(self,P):
+        return self.x*P.x + self.y*P.y
+
+    def dist(self,P=None):
+        if P is None: P=Point(0,0)
+        return np.sqrt((self.x - P.x)**2 + (self.y - P.y)**2)
+
     def __call__(self):
         return self.x, self.y
 
@@ -83,14 +96,26 @@ class Point:
     @staticmethod
     def ridge(icol, xs, iP):
         pts = []
+        pv=None
         for x in sorted(icol.keys()):
             if len(icol[x]) > 0:
                 Px = icol[x]
                 y = [i.y for i in Px]
-                id = search(y, iP.y)
+                if not pv: id = search(y, iP.y)
+                else:
+                    ang=np.pi
+                    id=0
+                    for n,P in enumerate(Px):
+                        kang=abs(np.arctan(pv.slope(iP))-np.arctan(iP.slope(P)))
+                        if kang<ang:
+                            ang=kang
+                            id=n
+                '''
                 if y[id] < iP.y and id < len(icol[x]) - 1:
                     if y[id + 1] - iP.y < (iP.y - y[id]): id += 1
+                    '''
                 Px[id]._select()
+                pv=iP
                 iP = Px[id]
                 pts.append(iP)
 
@@ -144,18 +169,54 @@ class Ridge:
             return all(i==j for i,j in zip(self,R))
         return False
 
+    def __repr__(self):
+        return f"Ridge({self.pts})"
+
+    def dist(self,P:Point):
+        if P in self:
+            return 0.0
+        else:
+            ireg=search([i.x for i in self.pts],P.x)
+            P1=self.pts[ireg]
+            P2=None
+            if ireg!=0:
+                P2=self.pts[ireg-1]
+            if ireg!=len(self)-1:
+                P3=self.pts[ireg+1]
+                if P2:
+                    if P.dist(P2)>P.dist(P3): P2=P3
+                else: P2=P3
+
+            if P2:
+                l=P2-P1
+                v=P-P1
+                t=l.dot(v)/l.dist()**2
+                if t<=0: return P.dist(P1)
+                elif t>=1: return P.dist(P2)
+                return abs(l.x*v.y-l.y*v.x)/l.dist()
+            return P.dist(P1)
+
+    @property
+    def x(self):
+        return np.array([i.x for i in self.pts])
+
+    @property
+    def y(self):
+        return np.array([i.y for i in self.pts])
+
+
     def plot(self, ax=plt, dynamic=False):
         Cache.update(self)
         if isinstance(ax, MT):
             fig, ax = plt.subplots()
         if dynamic:
-            x = [i.x for i in self.pts]
-            y = [i.y for i in self.pts]
+            x = self.x
+            y = self.y
             if Ridge.slc: Ridge.slc.remove()
             Ridge.slc, = ax.plot(x, y, c="red", zorder=3)
         else:
-            x = [i.x for i in self.pts]
-            y = [i.y for i in self.pts]
+            x = self.x
+            y = self.y
             Ridge.sgt, = ax.plot(x, y, c="red", zorder=2)
 
     @staticmethod

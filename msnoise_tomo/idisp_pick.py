@@ -6,12 +6,13 @@ from .cache import Cache
 
 class idisp:
 
-    def __init__(self,amp,P,V,per,disper):
+    def __init__(self,amp,P,V,per,disper,dispers=None):
         self.amp=amp
         self.P=P
         self.V=V
         self.per=per
         self.disper=disper
+        self.dispers=[disper] if dispers is None else dispers
         self.picked=False
         Cache.refresh()
         Cache.update(Ridge([Point(x,y) for x, y in zip(per,disper)]))
@@ -24,7 +25,8 @@ class idisp:
         fig.colorbar(heatmap, label="Signal Strength")
         ax.plot(self.per, self.disper, '-ok', lw=1.5)
         ax.set_xlim(self.P[0], self.P[-1])
-        ax.set_ylim(self.V[0], self.V[-1])
+        Cache.lim=max(self.disper.max(),5)
+        ax.set_ylim(self.V[0], Cache.lim)
         ax.set_xlabel("Period (s)")
         ax.set_ylabel("Velocity (km/s)")
         NET1, STA1, NET2, STA2, crap = os.path.split(filename)[1].split('_')

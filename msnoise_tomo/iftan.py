@@ -28,7 +28,7 @@ from tkinter.font import Font
 
 
 
-def main():
+def main(interactive):
     # PLOTDIAGR = show
     PLOTRAWDISP = 0
     PLOTDISPALL = 0
@@ -115,6 +115,7 @@ def main():
                                                nfreq, 
                                                _ampmin.get(), 
                                                dist,
+                                               interactive,
                                                xdata, 
                                                ydata)
         basename = "%s.%s_%s.%s_%s" % (NET1, STA1, NET2, STA2, crap)
@@ -198,8 +199,10 @@ def main():
         p.set_title("%s.%s - %s.%s (%.2f km)" % (NET1, STA1, NET2, STA2, dist))
 
         title = "%s.%s - %s.%s" % (NET1, STA1, NET2, STA2)
-        os.makedirs("DISP CURVE PLOTS", exist_ok=True)
-        f.savefig(f"DISP CURVE PLOTS/{title}.png")
+        filename = cb_val.get()
+        savefile=os.path.split(filename)[0].replace("TOMO_SAC","DISP CURVE PLOTS")
+        os.makedirs(savefile, exist_ok=True)
+        f.savefig(os.path.join(savefile,f"{title}.png"))
         
         canvas.draw()
 

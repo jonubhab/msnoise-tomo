@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pandas as pd
 
-def main(pair, bmin, bmax, show):
+def main(pair, bmin, bmax, show,interactive):
     PLOTDIAGR   = show
     PLOTRAWDISP = 0
     PLOTDISPALL = 0
@@ -80,15 +80,14 @@ def main(pair, bmin, bmax, show):
                 # fn = os.path.join("TOMO_SAC", "%s_%s_REAL.SAC"%(netsta2.replace('.','_'), netsta1.replace('.','_')))
                 # SACfilelist.append(fn)
                 fn = os.path.join("TOMO_SAC", "%s_%s_MEAN.sac"%(netsta1.replace('.','_'), netsta2.replace('.','_')))
-                if not os.path.exists(os.path.join("DISP CURVE PLOTS",
-                                                   "%s - %s.png" % (netsta1, netsta2))):  #
-                    if os.path.isfile(fn):
-                        SACfilelist.append(fn)
-                        savefiles.append("DISP CURVE PLOTS")
-                    else:
-                        print("no file named", fn)
-                break
+                if os.path.isfile(fn):
+                    SACfilelist.append(fn)
+                    savefiles.append("DISP CURVE PLOTS")
+                else:
+                    print("no file named", fn)
+
             pair = None
+            break
         
         print("Will process the following SAC files")
         print(SACfilelist)
@@ -111,7 +110,7 @@ def main(pair, bmin, bmax, show):
 
             # pick the dispserion curve from fmin to fmax with nfreq elements
             per, disper, seeds = pickgroupdispcurv(filename, fmin, fmax, vgmin, vgmax, bmin, bmax,
-                                            diagramtype, nfreq, ampmin, dist)
+                                            diagramtype, nfreq, ampmin, dist,interactive)
 
             # copy the files from C++ output to files with basename prepended
             basename = "%s.%s_%s.%s_%s" % (NET1, STA1, NET2, STA2, crap)

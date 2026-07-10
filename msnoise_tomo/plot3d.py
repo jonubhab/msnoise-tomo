@@ -8,13 +8,13 @@ def main():
 
     all = []
     for n, per in enumerate(periods):
-        f = "tomo_%.1fs.txt"%per
+        f = "tomo_%.4fs.txt"%per
         print(f)
         if not os.path.isfile(f):
             continue
         tmp = np.loadtxt(f)
-        for i in tmp.shape[0]:
-            for j in tmp.shape[1]:
+        for i in range(tmp.shape[0]):
+            for j in range(tmp.shape[1]):
                 all.append([ i, j, n, tmp[i,j]] )
     print(all)
 

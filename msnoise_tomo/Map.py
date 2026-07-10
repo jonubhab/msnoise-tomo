@@ -166,17 +166,19 @@ class Map:
             #yield x, P
             peaks[x] = P
 
-        for x,y in self.prepick.items():
+        for x,ys in self.prepick.items():
             if x in peaks:
-                if y not in [p.y for p in peaks[x]]: peaks[x].append(Point(x,y))
-            else: peaks[x] = [Point(x,y)]
+                for y in ys:
+                    if y not in [p.y for p in peaks[x]]: peaks[x].append(Point(x,y))
+            else: peaks[x] = [Point(x,y) for y in ys]
 
         for x,P in peaks.items():
             yield x, P
 
     def default(self,per,disper):
+        disper=np.atleast_2d(disper)
         self.prepick = {}
-        for i,j in zip(per,disper):self.prepick[i] = j
+        for i,j in enumerate(per):self.prepick[j] = set(disper[:,i])
 
     def plot(self, ax=plt, show=True):
 
@@ -190,7 +192,7 @@ class Map:
         heatmap = ax.contourf(Per, Vitg, self.map.T, 35, cmap=inferno)
 
         ax.set_xlim(Per.min(), Per.max())
-        ax.set_ylim(Vitg.min(), Vitg.max())
+        ax.set_ylim(Vitg.min(), Cache.lim)
 
         col=[]
         icol={}

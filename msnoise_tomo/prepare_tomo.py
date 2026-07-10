@@ -1,7 +1,7 @@
 from msnoise.api import *
 
 
-def main():
+def main(vmin,vmax):
     db = connect()
     for filter in get_filters(db):
         filterid = filter.ref
@@ -16,6 +16,9 @@ def main():
                     continue
                 print("Reading", fn)                    
                 tmp = pd.read_csv(fn, index_col=0, delimiter=',')
+                colname="%s.%s_%s.%s_MEAN"%(station1.net, station1.sta, station2.net, station2.sta)
+                outside_limits = ~tmp[colname].between(vmin, vmax)
+                tmp.loc[outside_limits, colname] = np.nan
                 tmp.columns = ["%s_%s"%(sta1, sta2)]
                 alldf.append(tmp)
                 del tmp

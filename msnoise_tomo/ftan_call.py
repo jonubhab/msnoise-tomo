@@ -6,7 +6,7 @@ import numpy as np
 from .lib.libvg_fta import ftan
 
 def pickgroupdispcurv(filename, fmin, fmax, vgmin, vgmax, bmin, bmax,
-                      diagramtype, nfreq, ampmin, dist, pinit=0, vinit=0):
+                      diagramtype, nfreq, ampmin, dist, interactive=False, pinit=0, vinit=0):
     # if sys.platform[:3] == "win":
     #     ftan = os.path.join(os.path.split(os.path.realpath(__file__))[0],"lib", r"ftan.exe")
     # else:
@@ -121,32 +121,33 @@ def pickgroupdispcurv(filename, fmin, fmax, vgmin, vgmax, bmin, bmax,
 
     '''
     '''
-    per=np.atleast_1d(per)
-    disper=np.atleast_1d(disper)
-    comp=os.path.basename(os.path.dirname(filename))
+    if interactive:
+        per=np.atleast_1d(per)
+        disper=np.atleast_1d(disper)
+        comp=os.path.basename(os.path.dirname(filename))
 
-    from .Caller import main
-    from .idisp_pick import idisp
-    iwin=idisp(amp,P,V,per,disper)
+        from .Caller import main
+        from .idisp_pick import idisp
+        iwin=idisp(amp,P,V,per,disper)
 
-    data={"idisp":iwin,
-          "filename":filename,
-          "dist":dist,
-          "comp":comp}
-    main(data)
+        data={"idisp":iwin,
+              "filename":filename,
+              "dist":dist,
+              "comp":comp}
+        main(data)
 
-    if iwin.picked:
-        # Process the automatically picked dispersion curve from jonubhab's code. Ha! Ha! Ha!
-        D = np.loadtxt('write_disp.txt')
-        if D.ndim == 2:  # make sure that there is more than one pick
-            isort = np.argsort(D[:, 0])  # sort based on the first column (period)
-            D = D[isort]
-            per = D[:, 0]
-            disper = D[:, 1]
-        else:
-            print("Only one dispersion pick...check data!!!")
-            per = D[0]
-            disper = D[1]
+        if iwin.picked:
+            # Process the automatically picked dispersion curve from jonubhab's code. Ha! Ha! Ha!
+            D = np.loadtxt('write_disp.txt')
+            if D.ndim == 2:  # make sure that there is more than one pick
+                isort = np.argsort(D[:, 0])  # sort based on the first column (period)
+                D = D[isort]
+                per = D[:, 0]
+                disper = D[:, 1]
+            else:
+                print("Only one dispersion pick...check data!!!")
+                per = D[0]
+                disper = D[1]
 
 
     '''
