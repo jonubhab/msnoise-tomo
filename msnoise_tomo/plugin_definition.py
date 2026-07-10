@@ -122,6 +122,15 @@ def autopick_sw(pair,show,interact):
     from .autopick_sw import main
     main(pair,show,interact)
 
+
+@click.option('-p', '--pair', default=None,  help='FTAN a specific pair\tFormat: NET.STA1_NET.STA2',
+              multiple=True)
+@click.command(name="pick_sw")
+def pick_sw(pair):
+    from .pick_sw import main
+    main(pair)
+
+
 @click.option('-a','--all',is_flag=True, default=False,help='Reset the entire FTAN process and start from scratch.')
 @click.option('-c', '--comp', default=None, help='Component to be deleted entirely')
 @click.command(name="reset_ftan")
@@ -251,6 +260,7 @@ tomo.add_command(plot)
 tomo.add_command(prepare_1d)
 tomo.add_command(plot3d)
 tomo.add_command(grid_disp)
+tomo.add_command(pick_sw)
 
 
 from .default import default
